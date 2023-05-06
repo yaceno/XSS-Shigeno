@@ -10,6 +10,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from tqdm import tqdm
 
+# Customized XSS Detector
+
 def detect_xss(url, payloads):
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -33,7 +35,7 @@ def detect_xss(url, payloads):
 
             driver.find_element(By.CSS_SELECTOR, 'input[type="submit"]').click()
             time.sleep(1)
-            # Wait for the alert to be present
+            # Wait for the alert to appear
             wait = WebDriverWait(driver, 2)
             alert_present = EC.alert_is_present()(driver)
 
@@ -46,7 +48,7 @@ def detect_xss(url, payloads):
     return correct_payload
 
 def run(url) -> None:
-    print("########### Reflected XSS Detector ###########")
+    print("########### XSS Shigeno ⚾ ###########")
 
     # The list of payloads is a portion of payloads from https://github.com/payloadbox/xss-payload-list/blob/master/Intruder/xss-payload-list.txt
     with open('xss-payload-list.txt', 'r') as f:
@@ -60,7 +62,7 @@ def run(url) -> None:
         print("\nXSS Detected :"+payload)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Reflected XSS Detector')
+    parser = argparse.ArgumentParser(description='Custom Reflected XSS Detector')
     parser.add_argument('-s', '--site', type=str, help='URL of the vulnerable site', required=True)
     args = parser.parse_args()
     run(args.site)
