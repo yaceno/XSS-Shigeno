@@ -12,9 +12,10 @@ from tqdm import tqdm
 
 # Customized XSS Detector
 
-def detect_xss(url, payloads):
+def detect_xss(url, payloads, headless):
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    if headless:
+        chrome_options.add_argument("--headless")
 
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
@@ -47,14 +48,14 @@ def detect_xss(url, payloads):
 
     return correct_payload
 
-def run(url) -> None:
+def run(url, headless=True) -> None:
     print("########### XSS Shigeno ⚾ ###########")
 
     # The list of payloads is a portion of payloads from https://github.com/payloadbox/xss-payload-list/blob/master/Intruder/xss-payload-list.txt
     with open('xss-payload-list.txt', 'r') as f:
         payloads: List[str] = f.read().splitlines()
 
-    payload = detect_xss(url, payloads)
+    payload = detect_xss(url, payloads, headless)
 
     if payload=="":
         print("\nNot vulnerable to XSS")
@@ -64,5 +65,8 @@ def run(url) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Custom Reflected XSS Detector')
     parser.add_argument('-s', '--site', type=str, help='URL of the vulnerable site', required=True)
+    parser.add_argument('-b', '--browser', action='store_true', help='Run in browser mode')
     args = parser.parse_args()
-    run(args.site)
+    headless=not args.browser
+    print(headless)
+    run(args.site, headless)
