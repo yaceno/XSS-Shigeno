@@ -1,72 +1,27 @@
 import argparse
-import time
-from typing import List
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
-from tqdm import tqdm
+from detect import *
+from link import *
 
-# Customized XSS Detector
-
-def detect_xss(url, payloads, headless):
-    chrome_options = Options()
-    if headless:
-        chrome_options.add_argument("--headless")
-
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-
-    tested_payloads = 0
-    correct_payload = ""
-    with tqdm(total=len(payloads), desc="Progress", unit="payload") as pbar:
-        for payload in payloads:
-            tested_payloads += 1
-            pbar.set_postfix({"Payload": payload, "Tested": tested_payloads})
-            pbar.update(1)
-
-            driver.get(url)
-
-            input_elements = driver.find_elements(By.CSS_SELECTOR, 'input:not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="hidden"]), textarea')
-
-            for input_element in input_elements:
-                input_element.send_keys(payload)
-
-            driver.find_element(By.CSS_SELECTOR, 'input[type="submit"]').click()
-            time.sleep(1)
-            # Wait for the alert to appear
-            wait = WebDriverWait(driver, 2)
-            alert_present = EC.alert_is_present()(driver)
-
-            if alert_present:
-                correct_payload=payload
-                break
-
-    driver.quit()
-
-    return correct_payload
-
-def run(url, headless=True) -> None:
+def run(url, headless) -> None:
     print("########### XSS Shigeno ⚾ ###########")
 
     # The list of payloads is a portion of payloads from https://github.com/payloadbox/xss-payload-list/blob/master/Intruder/xss-payload-list.txt
     with open('xss-payload-list.txt', 'r') as f:
-        payloads: List[str] = f.read().splitlines()
+        payloads = f.read().splitlines()
 
-    payload = detect_xss(url, payloads, headless)
+    print("Searching...")
+    driver = link(headless)
+    payload = detect_xss(driver, url, payloads, headless)
 
-    if payload=="":
+    if payload==None:
         print("\nNot vulnerable to XSS")
     else:
-        print("\nXSS Detected :"+payload)
+        print("\nXSS Detected : "+payload)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Custom Reflected XSS Detector')
     parser.add_argument('-s', '--site', type=str, help='URL of the vulnerable site', required=True)
-    parser.add_argument('-b', '--browser', action='store_true', help='Run in browser mode')
+    parser.add_argument('-b', '--browser', action='store_true', help='Run in browser mode (non-headless)')
     args = parser.parse_args()
-    headless=not args.browser
-    print(headless)
+    headless= not args.browser
     run(args.site, headless)
