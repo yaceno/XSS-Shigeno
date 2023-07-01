@@ -6,5 +6,5 @@ For the moment, it allows to detect input texts and run a lot of xss payloads in
 
 ## Usage
 - `pip3 install -r requirements.txt`
-- Launch the tool with the site you want, example : `python3 xsshigeno.py -s https://xss-game.appspot.com/level1/frame`
+- Launch the tool with the site you want, example : `python3 src/xsshigeno.py -s https://xss-game.appspot.com/level1/frame`
 - To run the tool showing the actions on the browser (non-headless mode) add `-b` option
