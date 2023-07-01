@@ -1,4 +1,3 @@
-import argparse
 import time
 from typing import List
 from selenium.webdriver.common.by import By
