@@ -9,8 +9,8 @@ def run(url, headless) -> None:
     with open('xss-payload-list.txt', 'r') as f:
         payloads = f.read().splitlines()
 
-    print("Searching...")
     driver = link(headless)
+    print("Searching...")
     payload = detect_xss(driver, url, payloads, headless)
 
     if payload==None:
